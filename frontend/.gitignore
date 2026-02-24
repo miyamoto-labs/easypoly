@@ -1,0 +1,11 @@
+.vercel
+node_modules
+.next
+.env*.local
+.env
+.env.production
+.env.staging
+tsconfig.tsbuildinfo
+.DS_Store
+*.log
+polymarket-auth.json

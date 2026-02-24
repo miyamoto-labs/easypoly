@@ -1,0 +1,10 @@
+-- EasyPoly Database Schema
+-- ========================
+-- Schema is already deployed in Supabase project: ljseawnwxbkrejwysrey
+-- 14 tables prefixed with ep_:
+--   ep_markets_raw, ep_price_snapshots, ep_detected_opportunities,
+--   ep_curated_picks, ep_pick_results, ep_tracked_traders,
+--   ep_trader_trades, ep_audit_log, and others.
+--
+-- To view or modify the schema, use the Supabase Dashboard:
+--   https://supabase.com/dashboard/project/ljseawnwxbkrejwysrey/editor
