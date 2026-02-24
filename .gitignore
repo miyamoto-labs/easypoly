@@ -1,0 +1,40 @@
+# Dependencies
+node_modules/
+__pycache__/
+*.pyc
+venv/
+env/
+.venv/
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Build
+dist/
+build/
+.next/
+out/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+.DS_Store
+
+# Logs
+*.log
+logs/
+
+# Database
+*.db
+*.sqlite
+
+# Secrets
+config/secrets.json
+credentials.json
+
+# Testing
+coverage/
+.pytest_cache/
