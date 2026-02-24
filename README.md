@@ -7,6 +7,7 @@
 > Powered by [Polymarket](https://polymarket.com) | Built with [Synthdata](https://synthdata.co)
 
 [![Live App](https://img.shields.io/badge/🚀_Live_App-easypoly.lol-brightgreen)](https://www.easypoly.lol)
+[![Telegram](https://img.shields.io/badge/💬_Telegram-Join_Community-blue)](https://t.me/easypoly_community)
 [![Hackathon](https://img.shields.io/badge/Synthdata-Hackathon%202026-blue)](https://dashboard.synthdata.co/hackathon)
 [![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 
@@ -242,6 +243,7 @@ MIT License — see [LICENSE](LICENSE)
 ## 🔗 Links
 
 - **Live App:** [easypoly.lol](https://www.easypoly.lol) ✅
+- **Telegram:** [Join the Community](https://t.me/easypoly_community) 💬
 - **Twitter:** [@easypoly_lol](https://twitter.com/easypoly_lol)
 - **GitHub:** [miyamoto-labs/easypoly](https://github.com/miyamoto-labs/easypoly)
 
