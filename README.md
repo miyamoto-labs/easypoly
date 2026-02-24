@@ -67,10 +67,14 @@ easypoly/
 - Python 3.11+ (FastAPI)
 - Node.js 18+
 
-**APIs**
-- Synthdata (predictions)
-- Polymarket (trading)
-- PostgreSQL (coming soon)
+**APIs & Data Sources**
+- Synthdata (probabilistic forecasts)
+- Perplexity (AI-powered market research & news)
+- Polymarket (trading & market data)
+
+**Database**
+- Supabase (PostgreSQL)
+- Redis (caching, coming soon)
 
 ---
 
@@ -157,6 +161,30 @@ Analyze trader performance on Synthdata-accurate markets:
 
 **Output:** "Synthdata Alpha Correlation" score per trader
 
+### 4. AI-Powered Market Research
+
+Use Perplexity API for real-time market intelligence:
+
+```python
+# Query Perplexity for market context
+response = perplexity.query(
+    f"What are the key factors affecting {market_question}?"
+)
+
+# Extract insights
+context = response['answer']
+sources = response['citations']
+
+# Feed into conviction engine
+conviction_boost = analyze_sentiment(context)
+```
+
+**Use cases:**
+- News event analysis for market context
+- Sentiment analysis on trending topics
+- Verification of market assumptions
+- Real-time research for conviction scoring
+
 ---
 
 ## 📸 Screenshots
@@ -220,7 +248,9 @@ MIT License — see [LICENSE](LICENSE)
 ## 🙏 Built With
 
 - [Synthdata](https://synthdata.co) — Probabilistic forecasting
+- [Perplexity](https://www.perplexity.ai) — AI-powered market research
 - [Polymarket](https://polymarket.com) — Prediction markets
+- [Supabase](https://supabase.com) — Backend infrastructure
 - [MIYAMOTO LABS](https://miyamotolabs.com) — Autonomous AI systems
 
 ---

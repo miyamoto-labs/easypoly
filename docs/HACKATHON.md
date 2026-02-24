@@ -85,6 +85,28 @@ We analyze trader performance on **Synthdata-accurate markets**:
 
 **Use case:** Copy traders who have proven ability to spot what Synthdata spots.
 
+### 4. AI-Powered Context
+
+We enhance Synthdata predictions with **Perplexity API** for real-time market intelligence:
+
+- **News analysis:** Fetch breaking news related to market questions
+- **Sentiment scoring:** Analyze public sentiment on events
+- **Context enrichment:** Add qualitative data to quantitative predictions
+
+**Integration:**
+```python
+# Get market context from Perplexity
+context = perplexity.query(
+    f"What factors are affecting {market_question}?"
+)
+
+# Boost conviction based on sentiment
+if positive_sentiment(context):
+    conviction_score += sentiment_boost
+```
+
+**Why it matters:** Synthdata gives probabilities. Perplexity explains *why*.
+
 ---
 
 ## 💡 Innovation
