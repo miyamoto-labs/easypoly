@@ -4,6 +4,7 @@
 > 
 > AI-powered prediction market analytics + copy trading platform
 
+[![Live App](https://img.shields.io/badge/🚀_Live_App-easypoly.lol-brightgreen)](https://www.easypoly.lol)
 [![Hackathon](https://img.shields.io/badge/Synthdata-Hackathon%202026-blue)](https://dashboard.synthdata.co/hackathon)
 [![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 
