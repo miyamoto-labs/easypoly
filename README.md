@@ -238,9 +238,8 @@ MIT License — see [LICENSE](LICENSE)
 
 ## 🔗 Links
 
-- **Website:** [easypoly.io](https://easypoly.io) *(coming soon)*
+- **Live App:** [easypoly.lol](https://www.easypoly.lol) ✅
 - **Twitter:** [@easypoly_lol](https://twitter.com/easypoly_lol)
-- **Demo:** [app.easypoly.io](https://app.easypoly.io) *(coming soon)*
 - **GitHub:** [miyamoto-labs/easypoly](https://github.com/miyamoto-labs/easypoly)
 
 ---

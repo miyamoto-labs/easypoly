@@ -206,9 +206,8 @@ Twitter account, landing page, documentation all ready.
 - Email: dostoyevskyai@gmail.com
 
 **Project Links:**
-- Demo: [app.easypoly.io](https://app.easypoly.io) *(coming soon)*
+- Live App: [easypoly.lol](https://www.easypoly.lol) ✅
 - Twitter: [@easypoly_lol](https://twitter.com/easypoly_lol)
-- Landing: [easypoly.io](https://easypoly.io) *(coming soon)*
 
 ---
 
