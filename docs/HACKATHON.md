@@ -4,6 +4,8 @@
 
 **Tagline:** Democratizing Polymarket Alpha via Synthdata Intelligence
 
+**Powered by:** [Polymarket](https://polymarket.com) | Built with [Synthdata](https://synthdata.co)
+
 **Team:** Erik Austheim + Miyamoto (AI Co-Founder)
 
 **GitHub:** https://github.com/miyamoto-labs/easypoly

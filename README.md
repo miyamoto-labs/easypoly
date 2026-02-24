@@ -3,6 +3,8 @@
 > **Democratizing Polymarket Alpha via Synthdata Intelligence**
 > 
 > AI-powered prediction market analytics + copy trading platform
+> 
+> Powered by [Polymarket](https://polymarket.com) | Built with [Synthdata](https://synthdata.co)
 
 [![Live App](https://img.shields.io/badge/🚀_Live_App-easypoly.lol-brightgreen)](https://www.easypoly.lol)
 [![Hackathon](https://img.shields.io/badge/Synthdata-Hackathon%202026-blue)](https://dashboard.synthdata.co/hackathon)
@@ -245,14 +247,18 @@ MIT License — see [LICENSE](LICENSE)
 
 ---
 
-## 🙏 Built With
+## 🙏 Powered By
 
+- [Polymarket](https://polymarket.com) — Prediction market infrastructure
 - [Synthdata](https://synthdata.co) — Probabilistic forecasting
 - [Perplexity](https://www.perplexity.ai) — AI-powered market research
-- [Polymarket](https://polymarket.com) — Prediction markets
 - [Supabase](https://supabase.com) — Backend infrastructure
-- [MIYAMOTO LABS](https://miyamotolabs.com) — Autonomous AI systems
+- [MIYAMOTO LABS](https://miyamotolabs.com) — Built by
 
 ---
 
 **Made for the Synthdata Predictive Intelligence Hackathon 2026** 🚀
+
+---
+
+*EasyPoly is powered by [Polymarket](https://polymarket.com), the world's largest prediction market platform. We enhance the Polymarket trading experience with AI-powered analytics, trader discovery, and copy trading features.*
