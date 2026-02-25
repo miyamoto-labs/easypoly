@@ -894,9 +894,20 @@ function Footer() {
           <a href="https://polymarket.com" target="_blank" rel="noopener noreferrer" className="transition hover:text-text-primary">Polymarket</a>
           <a href="mailto:hello@miyamotolabs.com" className="transition hover:text-text-primary">Contact</a>
         </div>
-        <p className="text-xs text-text-muted">
-          © {new Date().getFullYear()} EasyPoly by Miyamoto Labs. Not financial advice.
-        </p>
+        <div className="flex flex-col items-center gap-1 text-xs text-text-muted sm:items-end">
+          <p>© {new Date().getFullYear()} EasyPoly by Miyamoto Labs. Not financial advice.</p>
+          <p className="text-text-muted/60">
+            Powered by{" "}
+            <a 
+              href="https://polymarket.com" 
+              target="_blank" 
+              rel="noopener noreferrer" 
+              className="text-ep-green hover:underline"
+            >
+              Polymarket
+            </a>
+          </p>
+        </div>
       </div>
     </footer>
   );
