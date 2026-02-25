@@ -785,11 +785,9 @@ class TraderDiscovery:
         # Sort by composite_rank descending
         traders_list.sort(key=lambda t: t.get("composite_rank", 0), reverse=True)
 
-        # Deactivate ALL traders first, then re-activate only discovered ones
-        from db.client import get_supabase
-        sb = get_supabase()
-        sb.table("ep_tracked_traders").update({"active": False}).neq("source", "user_added").execute()
-        log("info", "Deactivated all scanner-sourced traders before re-activation",
+        # NOTE: We do NOT deactivate existing traders - we ACCUMULATE good traders over time
+        # Each scan ADDS new discoveries to the existing database
+        log("info", "Upserting discovered traders (keeping existing active traders)",
             source="trader_discovery")
 
         # Upsert to DB (sets active=True for discovered traders)
