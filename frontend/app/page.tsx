@@ -211,6 +211,43 @@ function Hero() {
         Click-to-bet arcade with a live Snake game on the BTC chart — or let AI find 15%+ edges across 500+ markets. Two ways to trade. One platform.
       </motion.p>
 
+      {/* Powered by badge */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
+        transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1], delay: 0.1 }}
+        className="mt-6 flex items-center gap-2 text-sm text-text-muted/70"
+      >
+        <span>Powered by</span>
+        <a 
+          href="https://polymarket.com" 
+          target="_blank" 
+          rel="noopener noreferrer" 
+          className="text-ep-green hover:underline font-medium"
+        >
+          Polymarket
+        </a>
+        <span className="text-text-muted/40">·</span>
+        <a 
+          href="https://synthdata.co" 
+          target="_blank" 
+          rel="noopener noreferrer" 
+          className="text-ep-green hover:underline font-medium"
+        >
+          Synthdata
+        </a>
+        <span className="text-text-muted/40">·</span>
+        <a 
+          href="https://perplexity.ai" 
+          target="_blank" 
+          rel="noopener noreferrer" 
+          className="text-ep-green hover:underline font-medium"
+        >
+          Perplexity
+        </a>
+      </motion.div>
+
       {/* Dual CTAs */}
       <motion.div initial={{ opacity: 0, y: 20 }}
         whileInView={{ opacity: 1, y: 0 }}
