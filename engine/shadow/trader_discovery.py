@@ -329,8 +329,8 @@ class PolymarketClient:
             "offset": offset,
         })
 
-    async def get_all_trades(self, address: str, max_trades: int = 2000) -> list[dict]:
-        """Paginate through all trades for a user."""
+    async def get_all_trades(self, address: str, max_trades: int = 10000) -> list[dict]:
+        """Paginate through all trades for a user (increased limit for quality data)."""
         all_trades = []
         offset = 0
         batch_size = 500
@@ -368,9 +368,9 @@ class PolymarketClient:
         })
 
     async def get_all_closed_positions(
-        self, address: str, max_positions: int = 1000
+        self, address: str, max_positions: int = 10000
     ) -> list[dict]:
-        """Paginate through closed positions."""
+        """Paginate through closed positions (increased limit for complete data)."""
         all_positions = []
         offset = 0
         batch_size = 50  # API max
@@ -586,6 +586,28 @@ def compute_score(profile: TraderProfile) -> TraderScore:
         score.disqualify_reason = (
             f"Not enough resolved positions ({total_resolved} < {MIN_RESOLVED_POSITIONS})"
         )
+        return score
+
+    # ── DATA QUALITY CHECKS ────────────────────────────────────────
+    # Filter out suspicious/incomplete data that indicates API issues
+    win_rate_pct = (score.win_count / total_resolved * 100) if total_resolved > 0 else 0
+    
+    # Flag 1: Suspiciously high win rate (likely incomplete data)
+    if win_rate_pct >= 95.0 and total_resolved >= 20:
+        score.disqualified = True
+        score.disqualify_reason = f"Suspicious win rate ({win_rate_pct:.1f}% - likely incomplete API data)"
+        return score
+    
+    # Flag 2: Exactly at API pagination limits (incomplete data)
+    if score.total_trades >= 9999:  # Close to our 10k limit
+        score.disqualified = True
+        score.disqualify_reason = f"Trade count at API limit ({score.total_trades}) - incomplete data"
+        return score
+    
+    # Flag 3: Win rate with zero losses (but many trades)
+    if score.loss_count == 0 and total_resolved >= 10:
+        score.disqualified = True
+        score.disqualify_reason = f"Zero losses in {total_resolved} trades - likely API filtering issue"
         return score
 
     # ── PnL calculation ──────────────────────────────────────────
