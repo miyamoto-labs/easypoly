@@ -906,6 +906,24 @@ function Footer() {
             >
               Polymarket
             </a>
+            {" · "}
+            <a 
+              href="https://synthdata.co" 
+              target="_blank" 
+              rel="noopener noreferrer" 
+              className="text-ep-green hover:underline"
+            >
+              Synthdata
+            </a>
+            {" · "}
+            <a 
+              href="https://perplexity.ai" 
+              target="_blank" 
+              rel="noopener noreferrer" 
+              className="text-ep-green hover:underline"
+            >
+              Perplexity
+            </a>
           </p>
         </div>
       </div>
