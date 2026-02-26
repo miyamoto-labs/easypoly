@@ -255,13 +255,19 @@ export async function getDailyPicks(limit = 3) {
 }
 
 /**
- * Get curated traders from ep_traders table
+ * Get curated traders from ep_tracked_traders table
  */
 export async function getCuratedTraders(limit = 10) {
   const { data, error } = await supabase
-    .from('ep_traders')
-    .select('*')
-    .order('total_profit', { ascending: false })
+    .from('ep_tracked_traders')
+    .select('id, alias, wallet_address, roi, win_rate, total_pnl, trade_count, bankroll_tier, trading_style, composite_rank, active')
+    .eq('active', true)
+    .gt('roi', 0)
+    .gt('total_pnl', 50000)
+    .gte('win_rate', 45)
+    .lt('win_rate', 95)
+    .gt('trade_count', 100)
+    .order('roi', { ascending: false })
     .limit(limit);
 
   if (error) throw error;

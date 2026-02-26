@@ -60,7 +60,7 @@ export async function handleCopyBrowse(ctx) {
         {
           parse_mode: 'Markdown',
           ...Markup.inlineKeyboard([
-            [Markup.button.callback('📋 Start Copying', `copy_start:${trader.address}`)]
+            [Markup.button.callback('📋 Start Copying', `copy_start:${trader.wallet_address || trader.address}`)]
           ])
         }
       );

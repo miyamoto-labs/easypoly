@@ -86,6 +86,12 @@ bot.action('copy_cancel', async (ctx) => {
   await ctx.reply('❌ Cancelled');
 });
 
+// Copy start handler (from Browse Top Traders → Start Copying button)
+bot.action(/^copy_start:(.+)$/, async (ctx) => {
+  const traderAddress = ctx.match[1];
+  await handleCopyConfirm(ctx, traderAddress);
+});
+
 // Copy confirm/amount handlers
 bot.action(/^copy_confirm:(.+)$/, async (ctx) => {
   const traderAddress = ctx.match[1];

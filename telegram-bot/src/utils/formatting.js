@@ -141,20 +141,24 @@ ${outcome} @ ${pick.current_price}
 }
 
 /**
- * Format trader stats
+ * Format trader stats (from ep_tracked_traders schema)
  */
 export function formatTraderStats(trader) {
-  const winRate = ((trader.wins / trader.total_trades) * 100) || 0;
-  const roi = ((trader.total_profit / trader.total_volume) * 100) || 0;
-  
-  return `
-**${trader.name || formatAddress(trader.address)}**
+  const name = trader.alias || trader.name || formatAddress(trader.wallet_address || trader.address);
+  const winRate = trader.win_rate ?? ((trader.wins / trader.total_trades) * 100) || 0;
+  const roi = trader.roi ?? ((trader.total_profit / trader.total_volume) * 100) || 0;
+  const profit = trader.total_pnl ?? trader.total_profit ?? 0;
+  const trades = trader.trade_count ?? trader.total_trades ?? 0;
+  const tier = trader.bankroll_tier ? ` | ${trader.bankroll_tier.toUpperCase()}` : '';
+  const style = trader.trading_style ? ` | ${trader.trading_style}` : '';
 
-📊 Win Rate: ${winRate.toFixed(1)}%
-💰 Profit: ${formatUSDC(trader.total_profit)}
+  return `
+**${name}**${tier}${style}
+
+📊 Win Rate: ${parseFloat(winRate).toFixed(1)}%
+💰 Profit: ${formatUSDC(profit)}
 📈 ROI: ${formatPercent(roi)}
-🎯 Trades: ${trader.total_trades}
-💵 Avg Bet: ${formatUSDC(trader.avg_bet)}
+🎯 Trades: ${trades}
   `.trim();
 }
 
