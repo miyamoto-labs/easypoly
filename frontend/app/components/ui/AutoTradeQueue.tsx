@@ -63,6 +63,7 @@ export function AutoTradeQueue() {
   // Track signals we've already attempted to auto-execute (prevents double-firing)
   const attemptedRef = useRef<Set<string>>(new Set());
   const autoExecutingRef = useRef(false);
+  const handleExecuteRef = useRef<((trade: PendingTrade) => Promise<void>) | null>(null);
 
   // Only show if user has auto-trade enabled on any follow
   const hasAutoTradeFollows = follows.some((f) => f.autoTrade);
@@ -92,6 +93,43 @@ export function AutoTradeQueue() {
     const interval = setInterval(fetchQueue, 30000);
     return () => clearInterval(interval);
   }, [fetchQueue, isConnected, walletAddress, hasAutoTradeFollows]);
+
+  // ── Auto-execution: fire trades automatically when Privy is ready ──
+  // Must be declared before early returns to satisfy React rules of hooks.
+  // Uses handleExecuteRef because handleExecute is defined after the early returns.
+  useEffect(() => {
+    if (!privyReady || !privyCreateOrder) return;
+    if (autoExecutingRef.current) return;
+    if (pending.length === 0) return;
+    if (!handleExecuteRef.current) return;
+
+    // Find signals we haven't attempted yet and are fresh (< 5 min old)
+    const MAX_AGE_MS = 5 * 60 * 1000;
+    const now = Date.now();
+    const newTrades = pending.filter((t) => {
+      if (attemptedRef.current.has(t.signalId)) return false;
+      const age = now - new Date(t.timestamp).getTime();
+      return age < MAX_AGE_MS;
+    });
+
+    if (newTrades.length === 0) return;
+
+    autoExecutingRef.current = true;
+    setAutoExecuting(true);
+
+    const execFn = handleExecuteRef.current;
+    (async () => {
+      for (const trade of newTrades) {
+        attemptedRef.current.add(trade.signalId);
+        console.log(`[AutoTrade] Auto-executing signal ${trade.signalId} for ${trade.traderAlias} — $${trade.suggestedAmount} ${trade.direction}`);
+        await execFn(trade);
+        await new Promise((r) => setTimeout(r, 500));
+      }
+      autoExecutingRef.current = false;
+      setAutoExecuting(false);
+    })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pending, privyReady, privyCreateOrder]);
 
   // Don't render if no auto-trade follows or not connected
   if (!isConnected || !hasAutoTradeFollows) return null;
@@ -236,6 +274,9 @@ export function AutoTradeQueue() {
     }
   };
 
+  // Keep ref in sync so the auto-execute useEffect can call it
+  handleExecuteRef.current = handleExecute;
+
   const handleExecuteAll = async () => {
     setExecutingAll(true);
     for (const trade of pending) {
@@ -245,39 +286,6 @@ export function AutoTradeQueue() {
     }
     setExecutingAll(false);
   };
-
-  // ── Auto-execution: fire trades automatically when Privy is ready ──
-  useEffect(() => {
-    if (!privyReady || !privyCreateOrder) return;
-    if (autoExecutingRef.current) return;
-    if (pending.length === 0) return;
-
-    // Find signals we haven't attempted yet and are fresh (< 5 min old)
-    const MAX_AGE_MS = 5 * 60 * 1000;
-    const now = Date.now();
-    const newTrades = pending.filter((t) => {
-      if (attemptedRef.current.has(t.signalId)) return false;
-      const age = now - new Date(t.timestamp).getTime();
-      return age < MAX_AGE_MS;
-    });
-
-    if (newTrades.length === 0) return;
-
-    autoExecutingRef.current = true;
-    setAutoExecuting(true);
-
-    (async () => {
-      for (const trade of newTrades) {
-        attemptedRef.current.add(trade.signalId);
-        console.log(`[AutoTrade] Auto-executing signal ${trade.signalId} for ${trade.traderAlias} — $${trade.suggestedAmount} ${trade.direction}`);
-        await handleExecute(trade);
-        await new Promise((r) => setTimeout(r, 500));
-      }
-      autoExecutingRef.current = false;
-      setAutoExecuting(false);
-    })();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pending, privyReady, privyCreateOrder]);
 
   return (
     <div className="space-y-3">
