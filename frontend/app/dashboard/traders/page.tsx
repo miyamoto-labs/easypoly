@@ -64,6 +64,7 @@ export default function TradersPage() {
   const walletAddress = useUserStore((s) => s.walletAddress);
   const isConnected = useUserStore((s) => s.isConnected);
   const fetchFollows = useUserStore((s) => s.fetchFollows);
+  const followedTraderIds = useUserStore((s) => s.followedTraderIds);
   const { connect } = useWalletConnect();
   const [connectError, setConnectError] = useState<string | null>(null);
 
@@ -88,6 +89,7 @@ export default function TradersPage() {
   const [customAddr, setCustomAddr] = useState("");
   const [customCategory, setCustomCategory] = useState("");
   const [customLoading, setCustomLoading] = useState(false);
+  const [customCopyLoading, setCustomCopyLoading] = useState(false);
   const [customResult, setCustomResult] = useState<{
     type: "success" | "error";
     message: string;
@@ -125,6 +127,45 @@ export default function TradersPage() {
       setCustomResult({ type: "error", message: err.message || "Something went wrong" });
     } finally {
       setCustomLoading(false);
+    }
+  };
+
+  const handleStartCopyingCustom = async (trader: any) => {
+    if (!walletAddress || !trader?.id) return;
+    setCustomCopyLoading(true);
+    try {
+      // 1. Create the follow
+      const res = await fetch("/api/follows/toggle", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ walletAddress, traderId: trader.id }),
+      });
+      const data = await res.json();
+
+      if (data.success) {
+        // 2. Enable auto-trade with defaults
+        await fetch("/api/follows/settings", {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            walletAddress,
+            traderId: trader.id,
+            auto_trade: true,
+            amount_per_trade: 10,
+            max_daily_trades: 5,
+          }),
+        });
+        await fetchFollows();
+        setCustomResult({
+          type: "success",
+          message: `Now copying ${trader.alias || trader.wallet_address?.slice(0, 10)}! View signals in Copy Trading.`,
+          trader,
+        });
+      }
+    } catch {
+      setCustomResult({ type: "error", message: "Failed to start copying. Try again." });
+    } finally {
+      setCustomCopyLoading(false);
     }
   };
 
@@ -271,17 +312,36 @@ export default function TradersPage() {
               className="overflow-hidden"
             >
               <div
-                className={`mt-3 px-3 py-2 rounded-lg text-xs font-medium ${
+                className={`mt-3 px-3 py-2 rounded-lg text-xs font-medium flex items-center justify-between gap-2 ${
                   customResult.type === "success"
                     ? "bg-profit/10 text-profit border border-profit/20"
                     : "bg-loss/10 text-loss border border-loss/20"
                 }`}
               >
-                {customResult.message}
-                {customResult.type === "success" && customResult.trader && (
-                  <span className="ml-2 text-text-muted">
-                    {customResult.trader.trade_count || 0} trades · {(customResult.trader.win_rate || 0).toFixed(0)}% WR · {customResult.trader.bankroll_tier} tier
-                  </span>
+                <div>
+                  {customResult.message}
+                  {customResult.type === "success" && customResult.trader && (
+                    <span className="ml-2 text-text-muted">
+                      {customResult.trader.trade_count || 0} trades · {(customResult.trader.win_rate || 0).toFixed(0)}% WR · {customResult.trader.bankroll_tier} tier
+                    </span>
+                  )}
+                </div>
+                {customResult.type === "success" && customResult.trader && isConnected && (
+                  <div className="flex items-center gap-2 shrink-0">
+                    {followedTraderIds.includes(customResult.trader.id) ? (
+                      <span className="px-3 py-1 rounded-lg bg-accent/15 text-accent text-xs font-semibold">
+                        Copying ✓
+                      </span>
+                    ) : (
+                      <button
+                        onClick={() => handleStartCopyingCustom(customResult.trader)}
+                        disabled={customCopyLoading}
+                        className="px-3 py-1 rounded-lg bg-accent text-white text-xs font-semibold hover:bg-accent/90 disabled:opacity-50 transition flex items-center gap-1"
+                      >
+                        {customCopyLoading ? "Starting..." : "Start Copying →"}
+                      </button>
+                    )}
+                  </div>
                 )}
               </div>
             </motion.div>
