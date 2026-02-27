@@ -11,42 +11,28 @@ const GAMMA_API = process.env.GAMMA_API || 'https://gamma-api.polymarket.com';
  */
 export async function getTraderStats(address) {
   try {
-    // Use Data API to check if trader exists and get their name
-    const response = await axios.get('https://data-api.polymarket.com/trades', {
-      params: {
-        user: address.toLowerCase(),
-        limit: 1
-      },
-      timeout: 10000
-    });
+    const response = await axios.get(`${GAMMA_API}/profile/${address}`);
     
-    if (!response.data || response.data.length === 0) {
-      console.log(`No trades found for ${address}`);
+    if (!response.data) {
       return null;
     }
 
-    const trade = response.data[0];
-    const traderName = trade.name || trade.pseudonym || 'Unknown Trader';
+    const profile = response.data;
     
-    console.log(`✅ Found trader: ${traderName}`);
-    
-    // Return basic stats (placeholders for now - real stats would come from our database)
     return {
-      address: address.toLowerCase(),
-      name: traderName,
-      tradeCount: 100,
-      totalPnl: 50000,
-      totalVolume: 200000,
-      marketsTraded: 25,
-      roi: 150,
-      winRate: 70,
-      verified: false
+      address: address,
+      name: profile.name || null,
+      totalTrades: profile.total_trades || 0,
+      totalProfit: profile.total_profit || 0,
+      totalVolume: profile.total_volume || 0,
+      wins: profile.wins || 0,
+      losses: profile.losses || 0,
+      avgBet: profile.avg_bet || 0,
+      specialty: profile.specialty || 'general',
+      verified: profile.verified || false
     };
   } catch (error) {
     console.error('Error fetching trader stats:', error.message);
-    if (error.response) {
-      console.error('API response:', error.response.status, error.response.statusText);
-    }
     return null;
   }
 }

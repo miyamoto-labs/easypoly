@@ -7,32 +7,15 @@ dotenv.config();
 
 // Import commands
 import { startCommand, helpCommand } from './commands/start.js';
-import { getWalletBalance } from './services/privy.js';
-import { walletCommand, withdrawCommand, handleWalletCreate, handleWalletDeposit, handleWalletWithdraw, handleWalletTransactions, handleWithdrawConfirm, handleWithdrawCancel, handleWithdrawAmount, handleWithdrawAddress, handleWithdrawCustom, handleWalletExportKey } from './commands/wallet.js';
+import { walletCommand, handleWalletCreate, handleWalletDeposit, handleWalletWithdraw, handleWalletTransactions } from './commands/wallet.js';
 import { picksCommand, handleTrade } from './commands/picks.js';
 import { 
-  copyCommand,
-  handleCopyAdd,
-  handleCopyManage,
-  handleCopyRemove,
-  handleTraderAddressInput,
-  wizardStep1_TradeSize,
-  wizardNext,
-  wizardBack,
-  wizardCancel,
-  wizardActivate,
-  handleConfigAmount,
-  handleConfigAmountCustom,
-  handleConfigPosition,
-  handleConfigMaxTrades,
-  handleConfigExposure,
-  handleConfigStopLoss,
-  handleConfigTakeProfit,
-  handleConfigToggleBuys,
-  handleConfigToggleSells,
-  handleConfigToggleAutoClose,
-  handleConfigSlippage,
-  handleTextInput
+  copyCommand, 
+  handleCopyBrowse, 
+  handleCopyCustom, 
+  handleTraderAddress,
+  handleCopyConfirm,
+  handleCopyAmount
 } from './commands/copy.js';
 import { portfolioCommand, handlePositionDetails, handlePositionSell } from './commands/portfolio.js';
 import { 
@@ -69,66 +52,10 @@ bot.use(session());
 bot.command('start', startCommand);
 bot.command('help', helpCommand);
 bot.command('wallet', walletCommand);
-bot.command('withdraw', withdrawCommand);
 bot.command('picks', picksCommand);
 bot.command('copy', copyCommand);
 bot.command('portfolio', portfolioCommand);
 bot.command('settings', settingsCommand);
-
-// Handle withdraw flow (amount then address)
-
-// ============================================================================
-// KEYBOARD BUTTON HANDLERS
-// ============================================================================
-bot.hears('📊 Daily Picks', picksCommand);
-bot.hears('👥 Copy Traders', copyCommand);
-bot.hears('💼 Portfolio', portfolioCommand);
-bot.hears('⚙️ Settings', settingsCommand);
-
-bot.on('message', async (ctx) => {
-  if (!ctx.message?.text || ctx.message.text.startsWith('/')) return;
-  
-  const text = ctx.message.text.trim();
-  
-  // Step 1: User enters custom amount
-  if (ctx.session?.waitingWithdrawAmount) {
-    const amount = parseFloat(text);
-    if (isNaN(amount) || amount <= 0) {
-      await ctx.reply('❌ Please enter a valid amount (number)');
-      return;
-    }
-    
-    const balance = await getWalletBalance(ctx.session.walletAddress);
-    if (amount > parseFloat(balance)) {
-      await ctx.reply(`❌ Insufficient balance. You have ${formatUSDC(balance)} USDC`);
-      return;
-    }
-    
-    ctx.session.withdrawAmount = amount;
-    ctx.session.waitingWithdrawAmount = false;
-    
-    await ctx.reply(
-      `💸 **Withdraw $${amount} USDC**\n\n` +
-      'Please paste your external wallet address:',
-      { parse_mode: 'Markdown' }
-    );
-    return;
-  }
-  
-  // Step 2: User pastes address
-  if (ctx.session?.withdrawAmount) {
-    if (!/^0x[a-fA-F0-9]{40}$/.test(text)) {
-      await ctx.reply('❌ Invalid address. Please paste a valid Ethereum/Polygon address (starts with 0x...)');
-      return;
-    }
-    
-    const amount = ctx.session.withdrawAmount;
-    const address = text;
-    ctx.session.withdrawAmount = null;
-    
-    return handleWithdrawAddress(ctx, address, amount);
-  }
-});
 
 // ============================================================================
 // CALLBACK QUERY HANDLERS
@@ -144,69 +71,37 @@ bot.action('wallet_connect', handleWalletCreate);
 bot.action('wallet_create', handleWalletCreate);
 bot.action('wallet_deposit', handleWalletDeposit);
 bot.action('wallet_withdraw', handleWalletWithdraw);
-
-// Withdraw amount selection
-bot.action(/withdraw_amt:(.+)/, handleWithdrawAmount);
-bot.action('withdraw_custom', handleWithdrawCustom);
-bot.action('wallet_export_key', handleWalletExportKey);
-bot.action('wallet_menu', walletCommand);
 bot.action('wallet_txns', handleWalletTransactions);
-
-// Withdrawal confirmation callbacks
-bot.action(/^withdraw_confirm:([\d.]+):(.+)$/, async (ctx) => {
-  const amount = parseFloat(ctx.match[1]);
-  const address = ctx.match[2];
-  await handleWithdrawConfirm(ctx, amount, address);
-});
-bot.action('withdraw_cancel', handleWithdrawCancel);
 
 // Picks callbacks
 bot.action('daily_picks', picksCommand);
 
 // Copy trading callbacks
 bot.action('copy_traders', copyCommand);
-bot.action('copy_add', handleCopyAdd);
-bot.action('copy_manage', handleCopyManage);
-
-// Wizard navigation
-bot.action('wizard_start', wizardStep1_TradeSize);
-bot.action('wizard_next', wizardNext);
-bot.action('wizard_back', wizardBack);
-bot.action('wizard_cancel', wizardCancel);
-bot.action('wizard_activate', wizardActivate);
-
-// Config value callbacks
-bot.action(/^config_amount:(\d+)$/, async (ctx) => {
-  await handleConfigAmount(ctx, ctx.match[1]);
-});
-bot.action('config_amount_custom', handleConfigAmountCustom);
-bot.action(/^config_position:(\d+)$/, async (ctx) => {
-  await handleConfigPosition(ctx, ctx.match[1]);
-});
-bot.action(/^config_maxtrades:(\d+)$/, async (ctx) => {
-  await handleConfigMaxTrades(ctx, ctx.match[1]);
-});
-bot.action(/^config_exposure:(\d+)$/, async (ctx) => {
-  await handleConfigExposure(ctx, ctx.match[1]);
-});
-bot.action(/^config_sl:(-?\d+)$/, async (ctx) => {
-  await handleConfigStopLoss(ctx, ctx.match[1]);
-});
-bot.action(/^config_tp:(\d+)$/, async (ctx) => {
-  await handleConfigTakeProfit(ctx, ctx.match[1]);
-});
-bot.action(/^config_slip:([\d.]+)$/, async (ctx) => {
-  await handleConfigSlippage(ctx, ctx.match[1]);
+bot.action('copy_browse', handleCopyBrowse);
+bot.action('copy_custom', handleCopyCustom);
+bot.action('copy_cancel', async (ctx) => {
+  await ctx.answerCbQuery();
+  ctx.session.awaitingTraderAddress = false;
+  await ctx.reply('❌ Cancelled');
 });
 
-// Config toggles
-bot.action('config_toggle_buys', handleConfigToggleBuys);
-bot.action('config_toggle_sells', handleConfigToggleSells);
-bot.action('config_toggle_autoclose', handleConfigToggleAutoClose);
+// Copy start handler (from Browse Top Traders → Start Copying button)
+bot.action(/^copy_start:(.+)$/, async (ctx) => {
+  const traderAddress = ctx.match[1];
+  await handleCopyConfirm(ctx, traderAddress);
+});
 
-// Remove copy trade
-bot.action(/^copy_remove:(.+)$/, async (ctx) => {
-  await handleCopyRemove(ctx, ctx.match[1]);
+// Copy confirm/amount handlers
+bot.action(/^copy_confirm:(.+)$/, async (ctx) => {
+  const traderAddress = ctx.match[1];
+  await handleCopyConfirm(ctx, traderAddress);
+});
+
+bot.action(/^copy_amount:(.+):(\d+)$/, async (ctx) => {
+  const traderAddress = ctx.match[1];
+  const amount = ctx.match[2];
+  await handleCopyAmount(ctx, traderAddress, amount);
 });
 
 // Trade execution callbacks
@@ -259,9 +154,6 @@ bot.action('toggle_autocopy', (ctx) => handleToggleSetting(ctx, 'auto_copy_enabl
 // ============================================================================
 
 bot.on('text', async (ctx) => {
-  // Check if user is pasting a trader address
-  await handleTextInput(ctx);
-  
   // Check if user is waiting to enter custom amount
   if (ctx.session?.awaitingCustomAmount) {
     const { marketId, outcome } = ctx.session.awaitingCustomAmount;

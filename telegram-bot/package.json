@@ -19,6 +19,7 @@
   "author": "MIYAMOTO LABS",
   "license": "MIT",
   "dependencies": {
+    "@polymarket/builder-relayer-client": "^0.0.8",
     "@polymarket/clob-client": "^5.2.4",
     "@privy-io/server-auth": "^1.12.0",
     "@supabase/supabase-js": "^2.49.0",

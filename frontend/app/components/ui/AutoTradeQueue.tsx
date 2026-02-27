@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { DirectionBadge, TierBadge } from './Badges';
 import { useToast } from './Toast';
@@ -58,6 +58,12 @@ export function AutoTradeQueue() {
   const [loading, setLoading] = useState(true);
   const [executingId, setExecutingId] = useState<string | null>(null);
   const [executingAll, setExecutingAll] = useState(false);
+  const [autoExecuting, setAutoExecuting] = useState(false);
+
+  // Track signals we've already attempted to auto-execute (prevents double-firing)
+  const attemptedRef = useRef<Set<string>>(new Set());
+  const autoExecutingRef = useRef(false);
+  const handleExecuteRef = useRef<((trade: PendingTrade) => Promise<void>) | null>(null);
 
   // Only show if user has auto-trade enabled on any follow
   const hasAutoTradeFollows = follows.some((f) => f.autoTrade);
@@ -87,6 +93,43 @@ export function AutoTradeQueue() {
     const interval = setInterval(fetchQueue, 30000);
     return () => clearInterval(interval);
   }, [fetchQueue, isConnected, walletAddress, hasAutoTradeFollows]);
+
+  // ── Auto-execution: fire trades automatically when Privy is ready ──
+  // Must be declared before early returns to satisfy React rules of hooks.
+  // Uses handleExecuteRef because handleExecute is defined after the early returns.
+  useEffect(() => {
+    if (!privyReady || !privyCreateOrder) return;
+    if (autoExecutingRef.current) return;
+    if (pending.length === 0) return;
+    if (!handleExecuteRef.current) return;
+
+    // Find signals we haven't attempted yet and are fresh (< 5 min old)
+    const MAX_AGE_MS = 5 * 60 * 1000;
+    const now = Date.now();
+    const newTrades = pending.filter((t) => {
+      if (attemptedRef.current.has(t.signalId)) return false;
+      const age = now - new Date(t.timestamp).getTime();
+      return age < MAX_AGE_MS;
+    });
+
+    if (newTrades.length === 0) return;
+
+    autoExecutingRef.current = true;
+    setAutoExecuting(true);
+
+    const execFn = handleExecuteRef.current;
+    (async () => {
+      for (const trade of newTrades) {
+        attemptedRef.current.add(trade.signalId);
+        console.log(`[AutoTrade] Auto-executing signal ${trade.signalId} for ${trade.traderAlias} — $${trade.suggestedAmount} ${trade.direction}`);
+        await execFn(trade);
+        await new Promise((r) => setTimeout(r, 500));
+      }
+      autoExecutingRef.current = false;
+      setAutoExecuting(false);
+    })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pending, privyReady, privyCreateOrder]);
 
   // Don't render if no auto-trade follows or not connected
   if (!isConnected || !hasAutoTradeFollows) return null;
@@ -231,6 +274,9 @@ export function AutoTradeQueue() {
     }
   };
 
+  // Keep ref in sync so the auto-execute useEffect can call it
+  handleExecuteRef.current = handleExecute;
+
   const handleExecuteAll = async () => {
     setExecutingAll(true);
     for (const trade of pending) {
@@ -261,9 +307,19 @@ export function AutoTradeQueue() {
               />
             </svg>
             <h2 className="font-display text-lg font-bold">Auto-Trade Queue</h2>
-            <span className="rounded-full bg-accent/15 px-2 py-0.5 text-[11px] font-bold text-accent">
-              {pending.length}
-            </span>
+            {autoExecuting ? (
+              <span className="rounded-full bg-accent/15 px-2.5 py-0.5 text-[11px] font-bold text-accent animate-pulse flex items-center gap-1">
+                <svg className="w-3 h-3 animate-spin" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                </svg>
+                Executing...
+              </span>
+            ) : (
+              <span className="rounded-full bg-accent/15 px-2 py-0.5 text-[11px] font-bold text-accent">
+                {pending.length}
+              </span>
+            )}
           </div>
 
           {/* Daily limit */}

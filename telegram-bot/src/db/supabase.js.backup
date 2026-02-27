@@ -255,119 +255,23 @@ export async function getDailyPicks(limit = 3) {
 }
 
 /**
- * Get Elite 100 traders from ep_traders table
- * No filters needed - these are pre-selected top performers
+ * Get curated traders from ep_tracked_traders table
  */
 export async function getCuratedTraders(limit = 10) {
   const { data, error } = await supabase
-    .from('ep_traders')
-    .select(`
-      id,
-      name,
-      address,
-      rank,
-      elite_score,
-      roi_30d,
-      win_rate_30d,
-      net_profit_30d,
-      trades_30d,
-      markets_traded,
-      consistency_score,
-      total_volume_30d
-    `)
-    .eq('featured', true)
-    .order('rank', { ascending: true })
+    .from('ep_tracked_traders')
+    .select('id, alias, wallet_address, roi, win_rate, total_pnl, trade_count, bankroll_tier, trading_style, composite_rank, active')
+    .eq('active', true)
+    .gt('roi', 0)
+    .gt('total_pnl', 50000)
+    .gte('win_rate', 45)
+    .lt('win_rate', 95)
+    .gt('trade_count', 100)
+    .order('roi', { ascending: false })
     .limit(limit);
 
   if (error) throw error;
-  
-  // Map to expected format for backward compatibility
-  return (data || []).map(t => ({
-    id: t.id,
-    alias: t.name || `Trader #${t.rank}`,
-    wallet_address: t.address,
-    roi: t.roi_30d,
-    win_rate: t.win_rate_30d,
-    total_pnl: t.net_profit_30d,
-    trade_count: t.trades_30d,
-    bankroll_tier: t.total_volume_30d > 100000 ? 'whale' : t.total_volume_30d > 10000 ? 'mid' : 'small',
-    trading_style: t.trades_30d > 50 ? 'degen' : t.win_rate_30d > 70 ? 'sniper' : 'grinder',
-    composite_rank: t.rank,
-    active: true,
-    elite_score: t.elite_score,
-    consistency_score: t.consistency_score,
-    markets_traded: t.markets_traded
-  }));
+  return data || [];
 }
 
 export default supabase;
-
-/**
- * Save copy trade configuration with full risk management settings
- */
-export async function saveCopyTradeConfig(userId, traderAddress, config) {
-  // Check if config already exists
-  const { data: existing } = await supabase
-    .from('copy_trades')
-    .select('id')
-    .eq('user_id', userId)
-    .eq('trader_address', traderAddress.toLowerCase())
-    .single();
-  
-  if (existing) {
-    // Update existing
-    const { data, error } = await supabase
-      .from('copy_trades')
-      .update({
-        trader_name: config.trader_name || null,
-        amount_per_trade: config.amount_per_trade,
-        position_size_pct: config.position_size_pct,
-        max_trades_per_trader: config.max_trades_per_trader,
-        max_exposure_per_trader: config.max_exposure_per_trader,
-        slippage_tolerance: config.slippage_tolerance,
-        stop_loss_pct: config.stop_loss_pct,
-        take_profit_pct: config.take_profit_pct,
-        auto_close_on_exit: config.auto_close_on_exit,
-        copy_buys: config.copy_buys,
-        copy_sells: config.copy_sells,
-        min_confidence: config.min_confidence || null,
-        config_completed: config.config_completed || true,
-        status: config.status || 'active',
-        custom_trader: true
-      })
-      .eq('id', existing.id)
-      .select()
-      .single();
-    
-    if (error) throw error;
-    return data;
-  } else {
-    // Insert new
-    const { data, error } = await supabase
-      .from('copy_trades')
-      .insert({
-        user_id: userId,
-        trader_address: traderAddress.toLowerCase(),
-        trader_name: config.trader_name || null,
-        amount_per_trade: config.amount_per_trade,
-        position_size_pct: config.position_size_pct,
-        max_trades_per_trader: config.max_trades_per_trader,
-        max_exposure_per_trader: config.max_exposure_per_trader,
-        slippage_tolerance: config.slippage_tolerance,
-        stop_loss_pct: config.stop_loss_pct,
-        take_profit_pct: config.take_profit_pct,
-        auto_close_on_exit: config.auto_close_on_exit,
-        copy_buys: config.copy_buys,
-        copy_sells: config.copy_sells,
-        min_confidence: config.min_confidence || null,
-        config_completed: config.config_completed || true,
-        status: config.status || 'active',
-        custom_trader: true
-      })
-      .select()
-      .single();
-    
-    if (error) throw error;
-    return data;
-  }
-}
