@@ -251,6 +251,12 @@ class TraderQueries:
                 "last_trade_date": trader.get("last_trade_date"),
                 "category": trader.get("category"),
                 "market_categories": trader.get("market_categories"),
+                # V2 fields (market-first discovery)
+                "lifecycle_state": trader.get("lifecycle_state", "unknown"),
+                "rising_star": trader.get("rising_star", False),
+                "category_win_rates": trader.get("category_win_rates", {}),
+                "markets_specialized": trader.get("markets_specialized", []),
+                "last_hot_streak_date": trader.get("last_hot_streak_date"),
             }
             # Remove None values to avoid overwriting existing data with null
             update_cols = {k: v for k, v in update_cols.items() if v is not None}

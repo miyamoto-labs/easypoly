@@ -145,8 +145,8 @@ ${outcome} @ ${pick.current_price}
  */
 export function formatTraderStats(trader) {
   const name = trader.alias || trader.name || formatAddress(trader.wallet_address || trader.address);
-  const winRate = trader.win_rate ?? ((trader.wins / trader.total_trades) * 100) || 0;
-  const roi = trader.roi ?? ((trader.total_profit / trader.total_volume) * 100) || 0;
+  const winRate = trader.win_rate ?? (((trader.wins / trader.total_trades) * 100) || 0);
+  const roi = trader.roi ?? (((trader.total_profit / trader.total_volume) * 100) || 0);
   const profit = trader.total_pnl ?? trader.total_profit ?? 0;
   const trades = trader.trade_count ?? trader.total_trades ?? 0;
   const tier = trader.bankroll_tier ? ` | ${trader.bankroll_tier.toUpperCase()}` : '';

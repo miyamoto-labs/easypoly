@@ -23,64 +23,83 @@ export function TradesTable({ trades }: TradesTableProps) {
   const [showAll, setShowAll] = useState(false);
   const displayTrades = showAll ? trades : trades.slice(0, 10);
 
-  const exportToCSV = () => {
-    const headers = [
-      "Timestamp",
-      "Asset",
-      "Direction",
-      "Position Size",
-      "Profit",
-      "Edge",
-      "Confidence",
-      "Outcome",
-    ];
-
-    const rows = trades.map((trade) => [
-      trade.timestamp,
-      trade.asset,
-      trade.direction,
-      trade.position_size,
-      trade.profit,
-      trade.edge,
-      trade.confidence,
-      trade.outcome === 1 ? "Win" : "Loss",
-    ]);
-
-    const csv = [headers, ...rows].map((row) => row.join(",")).join("\n");
-
-    const blob = new Blob([csv], { type: "text/csv" });
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `backtest-trades-${new Date().toISOString().split("T")[0]}.csv`;
-    a.click();
-    window.URL.revokeObjectURL(url);
-  };
-
   if (trades.length === 0) {
     return (
       <div className="bg-card border border-border rounded-lg p-6">
-        <h2 className="text-2xl font-bold text-foreground mb-4">Trade History</h2>
+        <h2 className="text-xl sm:text-2xl font-bold text-foreground mb-4">Trade History</h2>
         <p className="text-text-muted text-center py-8">No trades executed</p>
       </div>
     );
   }
 
   return (
-    <div className="bg-card border border-border rounded-lg p-6">
-      <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-bold text-foreground">
+    <div className="bg-card border border-border rounded-lg p-4 sm:p-6">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-6">
+        <h2 className="text-xl sm:text-2xl font-bold text-foreground">
           Trade History ({trades.length} trades)
         </h2>
-        <button
-          onClick={exportToCSV}
-          className="px-4 py-2 bg-ep-green text-black font-medium rounded-lg hover:bg-ep-green/90 transition-colors"
-        >
-          📥 Export CSV
-        </button>
       </div>
 
-      <div className="overflow-x-auto">
+      {/* Mobile Card View (hidden on larger screens) */}
+      <div className="block lg:hidden space-y-3">
+        {displayTrades.map((trade, index) => (
+          <div
+            key={index}
+            className={`border border-border rounded-lg p-4 ${
+              trade.profit > 0 ? "bg-green-500/5" : "bg-red-500/5"
+            }`}
+          >
+            <div className="flex justify-between items-start mb-3">
+              <div>
+                <p className="text-sm text-text-muted">
+                  {new Date(trade.timestamp).toLocaleDateString("en-US", {
+                    month: "short",
+                    day: "numeric",
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })}
+                </p>
+                <p className="font-medium text-foreground">{trade.asset}</p>
+              </div>
+              <div className="text-right">
+                <span
+                  className={`px-2 py-1 rounded text-xs font-medium ${
+                    trade.direction === "long"
+                      ? "bg-green-500/20 text-green-400"
+                      : "bg-red-500/20 text-red-400"
+                  }`}
+                >
+                  {trade.direction.toUpperCase()}
+                </span>
+                <p
+                  className={`text-lg font-bold mt-1 ${
+                    trade.profit > 0 ? "text-green-400" : "text-red-400"
+                  }`}
+                >
+                  {trade.profit > 0 ? "+" : ""}${trade.profit.toFixed(2)}
+                </p>
+              </div>
+            </div>
+            <div className="grid grid-cols-3 gap-2 text-xs">
+              <div>
+                <p className="text-text-muted">Size</p>
+                <p className="text-foreground font-medium">${trade.position_size.toFixed(0)}</p>
+              </div>
+              <div>
+                <p className="text-text-muted">Edge</p>
+                <p className="text-foreground font-medium">{(trade.edge * 100).toFixed(1)}%</p>
+              </div>
+              <div>
+                <p className="text-text-muted">Confidence</p>
+                <p className="text-foreground font-medium">{(trade.confidence * 100).toFixed(0)}%</p>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Desktop Table View (hidden on mobile) */}
+      <div className="hidden lg:block overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-border">
@@ -155,7 +174,7 @@ export function TradesTable({ trades }: TradesTableProps) {
         <div className="mt-4 text-center">
           <button
             onClick={() => setShowAll(!showAll)}
-            className="px-4 py-2 bg-card-muted text-foreground rounded-lg hover:bg-card-hover transition-colors"
+            className="px-4 py-2 bg-card-muted text-foreground rounded-lg hover:bg-card-hover transition-colors text-sm sm:text-base"
           >
             {showAll ? "Show Less" : `Show All (${trades.length} trades)`}
           </button>

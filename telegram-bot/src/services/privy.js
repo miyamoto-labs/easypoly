@@ -1,5 +1,6 @@
 import { PrivyClient } from '@privy-io/server-auth';
 import dotenv from 'dotenv';
+import { getWalletBalances } from './blockchain.js';
 
 dotenv.config();
 
